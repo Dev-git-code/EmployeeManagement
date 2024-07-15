@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<Employee>
 
+
 @{
     ViewBag.Title = "Employees List";
 }
@@ -23,6 +24,9 @@
                 </td>
                 <td>
                     @employee.Department
+                </td>
+                <td>
+                    @employee.Email
                 </td>
             </tr>
         }
