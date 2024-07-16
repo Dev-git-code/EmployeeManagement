@@ -1,4 +1,5 @@
 using EmployeeManagement.Models;
+using Microsoft.EntityFrameworkCore;
 
 class Program
 {
@@ -6,11 +7,14 @@ class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddMvc();
+        builder.Services.AddDbContext<AppDbContext>(option =>
+        option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
         builder.Services.AddSingleton<IEmployeeRepository, MockEmployeeRepository>();
 
         var app = builder.Build();
         app.UseRouting();
         app.MapDefaultControllerRoute();
+        app.UseStaticFiles();
         app.Run();
     }
 }
