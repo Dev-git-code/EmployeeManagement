@@ -28,7 +28,7 @@ namespace EmployeeManagement.Models
 
         public Employee Delete(int id)
         {
-            Employee employee = _employeesList.FirstOrDefault(e => e.Id == Id);
+            Employee employee = _employeesList.FirstOrDefault(e => e.Id == id);
             if (employee != null)
             {
                 _employeesList.Remove(employee);

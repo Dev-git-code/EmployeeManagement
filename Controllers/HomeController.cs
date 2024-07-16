@@ -48,5 +48,11 @@ namespace EmployeeManagement.Controllers
                 
 
         }
+
+        public ViewResult Edit(int id)
+        {
+            Employee employeeFromDb = _employeeRepository.GetEmployee(id);
+            return View(employeeFromDb);
+        }
     }
 }
