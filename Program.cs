@@ -9,7 +9,7 @@ class Program
         builder.Services.AddMvc();
         builder.Services.AddDbContext<AppDbContext>(option =>
         option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-        builder.Services.AddSingleton<IEmployeeRepository, MockEmployeeRepository>();
+        builder.Services.AddScoped<IEmployeeRepository, SQLEmployeeRepository>();
 
         var app = builder.Build();
         app.UseRouting();
