@@ -54,5 +54,41 @@ namespace EmployeeManagement.Controllers
             Employee employeeFromDb = _employeeRepository.GetEmployee(id);
             return View(employeeFromDb);
         }
+
+        [HttpPost]
+        public IActionResult Edit(Employee employee)
+        {
+            if (ModelState.IsValid)
+            {
+                Employee employeeFromDb = _employeeRepository.GetEmployee(employee.Id);
+                employeeFromDb.Name = employee.Name;
+                employeeFromDb.Email = employee.Email;
+                employeeFromDb.Department = employee.Department;
+
+                Employee updatedEmployee = _employeeRepository.Update(employeeFromDb);
+                return RedirectToAction("Index");
+            }
+            return View(employee);
+        }
+
+        public ViewResult Delete(int id)
+        {
+            Employee employeeFromDb = _employeeRepository.GetEmployee(id);
+            return View(employeeFromDb);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(Employee employee)
+        {
+            Employee employeeFromDb = _employeeRepository.GetEmployee(employee.Id);
+            if(employeeFromDb != null)
+            {
+                Employee deletedEmployee = _employeeRepository.Delete(employee.Id);
+                return RedirectToAction("Index");
+
+            }
+            return View(employee);
+            
+        }
     }
 }
