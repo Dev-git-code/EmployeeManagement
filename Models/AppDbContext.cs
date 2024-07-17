@@ -2,7 +2,7 @@
 
 namespace EmployeeManagement.Models
 {
-    public class AppDbContext:DbContext
+    public class AppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -10,5 +10,10 @@ namespace EmployeeManagement.Models
         }
 
         public DbSet<Employee> Employees { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Seed();
+        }
     }
 }
