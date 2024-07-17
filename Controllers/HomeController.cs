@@ -1,5 +1,6 @@
 ﻿using EmployeeManagement.Models;
 using EmployeeManagement.ViewModels;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeManagement.Controllers
@@ -7,10 +8,13 @@ namespace EmployeeManagement.Controllers
     public class HomeController : Controller
     {
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public HomeController(IEmployeeRepository employeeRepository)
+        public HomeController(IEmployeeRepository employeeRepository,
+            UserManager<IdentityUser> userManager)
         {
             this._employeeRepository = employeeRepository;
+            _userManager = userManager;
         }
 
         public ViewResult Index()
@@ -25,8 +29,9 @@ namespace EmployeeManagement.Controllers
             return View(employeeListModel);
         }
 
-        public ViewResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
+
             HomeDetailsViewModel homeDetailsViewModel = new HomeDetailsViewModel()
             {
                 Employee = _employeeRepository.GetEmployee(id ?? 1),
@@ -84,14 +89,17 @@ namespace EmployeeManagement.Controllers
         }
 
         [HttpPost]
-        public IActionResult Delete(Employee employee)
+        public async Task<IActionResult> Delete(Employee employee)
         {
             Employee employeeFromDb = _employeeRepository.GetEmployee(employee.Id);
-            if(employeeFromDb != null)
+            //var user = await _userManager.FindByEmailAsync(employee.Email);
+            
+            if(employeeFromDb != null )
+                //&& user!=null)
             {
+               // var employeeFromUserDb = await _userManager.DeleteAsync(user);
                 Employee deletedEmployee = _employeeRepository.Delete(employee.Id);
                 return RedirectToAction("Index");
-
             }
             return View(employee);
             

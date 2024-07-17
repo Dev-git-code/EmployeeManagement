@@ -1,4 +1,5 @@
 ﻿
+
 namespace EmployeeManagement.Models
 {
     public class MockEmployeeRepository : IEmployeeRepository
@@ -46,6 +47,11 @@ namespace EmployeeManagement.Models
             Employee? employee = this._employeesList.FirstOrDefault(e => e.Id == id);
             return employee ?? new Employee();
             
+        }
+
+        public Task<Employee> GetEmployeeByEmailAsync(string email)
+        {
+            throw new NotImplementedException();
         }
 
         public Employee Update(Employee employeeUpdates)
