@@ -19,6 +19,12 @@ namespace EmployeeManagement.Controllers
             return View(employeeListModel);
         }
 
+        public ViewResult List()
+        {
+            var employeeListModel = _employeeRepository.GetAllEmployees();
+            return View(employeeListModel);
+        }
+
         public ViewResult Details(int? id)
         {
             HomeDetailsViewModel homeDetailsViewModel = new HomeDetailsViewModel()
