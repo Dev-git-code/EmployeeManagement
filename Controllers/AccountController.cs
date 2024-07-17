@@ -16,6 +16,13 @@ namespace EmployeeManagement.Controllers
             _signInManager = signInManager;
         }
 
+        [HttpPost]
+        public async Task<IActionResult> LogOut()
+        {
+            _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
         [HttpGet]
         public IActionResult Register()
         {

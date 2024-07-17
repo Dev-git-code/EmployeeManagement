@@ -1,24 +1,84 @@
-﻿@model IEnumerable<Employee>
+﻿<!-- Hero Section -->
+<section class="hero text-white text-center py-5 m-2" style="background-color:darkorange">
+    <div class="container">
+        <h1 class="display-4">Welcome to Employee Management System</h1>
+        <p class="lead">Manage your employees with ease and efficiency</p>
+    </div>
+</section>
 
-@{
-    ViewBag.Title = "Employees List";
-}
-
-<div class="card-group">
-    @foreach (var employee in Model)
-    {
-        <div class="card m-4" style="max-width:275px; min-width:275px;" >
-            <img class="card-img-top" src="~/images/noimage.jpg" />
-            <div class="card-header">
-                <h3>@employee.Name</h3>
+<<!-- Features Section -->
+<section id="features" class="py-5">
+    <div class="container">
+        <h2 class="text-center">Features</h2>
+        <div class="row">
+            <!-- Feature 1 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">OOP Concepts</h5>
+                        <p class="card-text">Implement different Object-Oriented Programming concepts like inheritance, polymorphism, encapsulation, and abstraction.</p>
+                    </div>
+                </div>
             </div>
-            <div class="card-footer text-center">
-                <a asp-controller="home" asp-action="details" asp-route-id="@employee.Id" class="btn btn-primary">View</a>
-                <a asp-controller="home" asp-action="edit" asp-route-id="@employee.Id"
-                   class="btn btn-primary m-1">Edit</a>
-                <a asp-controller="home" asp-action="delete" asp-route-id="@employee.Id" class="btn btn-danger">Delete</a>
+            <!-- Feature 2 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Role-based Access Control</h5>
+                        <p class="card-text">Two roles: Admin and Employee. Admins have read and write access to all records, while Employees can read and write only their own details.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Feature 3 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Password Encryption</h5>
+                        <p class="card-text">Secure login system with password encryption to ensure user data safety and confidentiality.</p>
+                    </div>
+                </div>
             </div>
         </div>
-    }
-</div>
+        <div class="row">
+            <!-- Feature 4 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Employee Management</h5>
+                        <p class="card-text">Admin can manage employee details including adding, updating, and deleting employee records.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Feature 5 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">SQL Server Integration</h5>
+                        <p class="card-text">Backend supported by SQL Server, with stored procedures, functions, and relationships for efficient data management.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Feature 6 -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Responsive Design</h5>
+                        <p class="card-text">Fully responsive design to provide an optimal viewing experience across various devices.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Section -->
+<section id="about" class="bg-light py-5">
+    <div class="container">
+        <h2 class="text-center">About Us</h2>
+        <p class="text-center">We are dedicated to providing the best employee management solutions to streamline your business operations.</p>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 
