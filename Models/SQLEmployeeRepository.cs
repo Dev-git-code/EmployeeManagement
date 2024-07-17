@@ -1,4 +1,7 @@
 ﻿
+
+using Microsoft.EntityFrameworkCore;
+
 namespace EmployeeManagement.Models
 {
     public class SQLEmployeeRepository : IEmployeeRepository
@@ -35,6 +38,11 @@ namespace EmployeeManagement.Models
         public Employee GetEmployee(int id)
         {
             return _context.Employees.Find(id);
+        }
+
+        public async Task<Employee> GetEmployeeByEmailAsync(string email)
+        {
+            return await _context.Employees.FirstOrDefaultAsync(e => e.Email == email);
         }
 
         public Employee Update(Employee employeeUpdates)

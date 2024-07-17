@@ -1,12 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EmployeeManagement.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace EmployeeManagement.ViewModels
 {
     public class RegisterViewModel
     {
-        [Required]
+     /*   [Required]
         [EmailAddress]
-        public string? Email { get; set; }
+        public string? Email { get; set; } */
 
         [Required]
         [DataType(DataType.Password)]
@@ -17,5 +18,7 @@ namespace EmployeeManagement.ViewModels
         [Compare("Password",
             ErrorMessage = "Password and confirmation password do not match.")]
         public string? ConfirmPassword { get; set; }
+
+        public Employee employee { get; set; }
     }
 }
