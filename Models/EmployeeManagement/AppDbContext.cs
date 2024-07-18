@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace EmployeeManagement.Models
+namespace EmployeeManagement.Models.EmployeeManagement
 {
-    public class AppDbContext:IdentityDbContext<IdentityUser>
+    public class AppDbContext : IdentityDbContext<IdentityUser>
     {
-        
+
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
-            
+
         }
 
         public DbSet<Employee> Employees { get; set; }
@@ -17,7 +17,7 @@ namespace EmployeeManagement.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Seed();          
+            //modelBuilder.Seed();          
         }
     }
 }

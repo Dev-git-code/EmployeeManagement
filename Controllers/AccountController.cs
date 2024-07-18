@@ -1,4 +1,4 @@
-﻿using EmployeeManagement.Models;
+﻿using EmployeeManagement.Models.EmployeeManagement;
 using EmployeeManagement.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

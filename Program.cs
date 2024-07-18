@@ -1,4 +1,6 @@
-using EmployeeManagement.Models;
+using EmployeeManagement.Models.EmployeeManagement;
+using EmployeeManagement.Models.RoleManagement;
+using EmployeeManagement.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,8 +35,16 @@ class Program
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
             var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
             await SuperAdmin.CreateSuperAdmin(userManager, employeeRepository);
+            //await SeedUsers.Seed(userManager, employeeRepository);
 
         }
+
+        /*using (var scope = app.Services.CreateScope())
+        {
+            var appdbcontext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            appdbcontext.Database.EnsureDeleted();
+        }*/
+        
 
         app.Run();
 

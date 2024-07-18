@@ -1,4 +1,4 @@
-﻿using EmployeeManagement.Models;
+﻿using EmployeeManagement.Models.EmployeeManagement;
 using System.ComponentModel.DataAnnotations;
 
 namespace EmployeeManagement.ViewModels
