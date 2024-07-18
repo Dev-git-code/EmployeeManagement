@@ -29,7 +29,7 @@ namespace EmployeeManagement.Controllers
             return View();
         }
 
-        [Authorize]
+        [Authorize(Roles="Admin")]
         public ViewResult List()
         {
             var employeeListModel = _employeeRepository.GetAllEmployees();
@@ -48,12 +48,14 @@ namespace EmployeeManagement.Controllers
 
         }
 
+        [Authorize(Roles="Admin")]
         public ViewResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles="Admin")]
         public async Task<IActionResult> Create(CreateViewModel createViewModel)
         {
             var user = new IdentityUser
@@ -67,6 +69,13 @@ namespace EmployeeManagement.Controllers
             if (result.Succeeded)
             {
                 Employee newEmployee = _employeeRepository.Add(createViewModel.employee);
+                if (createViewModel.employee.Role == Roles.Admin)
+                {
+                    await _userManager.AddToRoleAsync(user, "Admin");
+                }else
+                {
+                    await _userManager.AddToRoleAsync(user, "Employee");
+                }
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 return RedirectToAction("details", "home", new { id = newEmployee.Id });
             }
@@ -89,15 +98,16 @@ namespace EmployeeManagement.Controllers
             {
                 Employee employeeFromDb = _employeeRepository.GetEmployee(employee.Id);
                 employeeFromDb.Name = employee.Name;
+                employeeFromDb.Email = employee.Email;
                 employeeFromDb.Department = employee.Department;
-
-                Console.WriteLine(employee.Email.ToString());
+ 
                 Employee updatedEmployee = _employeeRepository.Update(employeeFromDb);
-                return RedirectToAction("List");
+                return RedirectToAction("Details",new { id = employeeFromDb.Id });
             }
             return View(employee);
         }
 
+        [Authorize(Roles="Admin")]
         public ViewResult Delete(int id)
         {
             Employee employeeFromDb = _employeeRepository.GetEmployee(id);
@@ -105,6 +115,7 @@ namespace EmployeeManagement.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(Employee employee)
         {
             Employee employeeFromDb = _employeeRepository.GetEmployee(employee.Id);

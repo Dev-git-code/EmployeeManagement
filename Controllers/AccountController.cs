@@ -49,7 +49,7 @@ namespace EmployeeManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> LogOut()
         {
-            _signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
 

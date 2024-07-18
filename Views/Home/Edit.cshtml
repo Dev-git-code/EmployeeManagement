@@ -5,8 +5,9 @@
 }
 
 <form asp-controller="home" asp-action="edit" method="post" class="mt-3">
-    <input hidden asp-for="Id" />
-    <input hidden asp-for="Email" /> 
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="Role" />
+    <input type="hidden" asp-for="Email"/>
     <div class="form-group row m-3" style="width:60%">
         <label asp-for="Name" class="col-sm-2 col-form-label"></label>
         <div class="col-sm-10">
@@ -18,7 +19,7 @@
         <label asp-for="Email" class="col-sm-2 col-form-label"></label>
         <div class="col-sm-10">
             <input asp-for="Email" disabled class="form-control" placeholder="Email">
-            
+            <span asp-validation-for="Email"></span>
         </div>
     </div>
 
@@ -36,7 +37,7 @@
     <div class="form-group row m-3">
         <div class="col-sm-10">
             <button type="submit" class="btn btn-primary">Update</button>
-            <a asp-action="index" asp-controller="home" class="btn btn-primary">Cancel</a>
+            <a asp-action="details" asp-controller="home" class="btn btn-primary">Cancel</a>
         </div>
     </div>
 </form>

@@ -1,5 +1,5 @@
 ﻿@model HomeDetailsViewModel
-
+@inject SignInManager<IdentityUser> signInManager;
 @{
     ViewBag.Title = "Employee Details";
 }
@@ -23,7 +23,13 @@
                 <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back</a>
                 <a asp-controller="home" asp-action="edit" asp-route-id="@Model.Employee.Id"
                    class="btn btn-primary m-1">Edit</a>
-                <a asp-controller="home" asp-action="delete" asp-route-id="@Model.Employee.Id" class="btn btn-danger">Delete</a>
+                @if (String.Equals(User.Identity.Name,Model.Employee.Name))
+                {
+                    @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="home" asp-action="delete" asp-route-id="@Model.Employee.Id" class="btn btn-danger">Delete</a>
+                    }
+                }            
             </div>
         </div>
     </div>
