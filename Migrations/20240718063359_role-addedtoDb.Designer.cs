@@ -4,6 +4,7 @@ using EmployeeManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmployeeManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240718063359_role-addedtoDb")]
+    partial class roleaddedtoDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,20 +143,6 @@ namespace EmployeeManagement.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "0c0e96e8-651d-470a-9c71-55997b7550c7",
-                            ConcurrencyStamp = "8113a7a7-c7be-436e-aaad-aa2c9f7c4ee0",
-                            Name = "Administrator"
-                        },
-                        new
-                        {
-                            Id = "979b9852-5334-496a-a7c7-8859cc2d54e8",
-                            ConcurrencyStamp = "c3ac9656-413b-4ee5-9172-4249868636c4",
-                            Name = "Employee"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

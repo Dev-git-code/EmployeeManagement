@@ -1,28 +1,35 @@
 ﻿using EmployeeManagement.Models;
 using EmployeeManagement.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace EmployeeManagement.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly IEmployeeRepository _employeeRepository;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
 
         public HomeController(IEmployeeRepository employeeRepository,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager)
         {
             this._employeeRepository = employeeRepository;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
+        [AllowAnonymous]
         public ViewResult Index()
         {
-            var employeeListModel = _employeeRepository.GetAllEmployees();
-            return View(employeeListModel);
+            return View();
         }
 
+        [Authorize]
         public ViewResult List()
         {
             var employeeListModel = _employeeRepository.GetAllEmployees();
@@ -47,15 +54,24 @@ namespace EmployeeManagement.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Employee employee)
+        public async Task<IActionResult> Create(CreateViewModel createViewModel)
         {
-            if (ModelState.IsValid)
+            var user = new IdentityUser
             {
-                Employee newEmployee = _employeeRepository.Add(employee);
-                return RedirectToAction("details", new { id = newEmployee.Id });
+                UserName = createViewModel.employee.Email,
+                Email = createViewModel.employee.Email
+            };
+
+            var result = await _userManager.CreateAsync(user, createViewModel.Password);
+
+            if (result.Succeeded)
+            {
+                Employee newEmployee = _employeeRepository.Add(createViewModel.employee);
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return RedirectToAction("details", "home", new { id = newEmployee.Id });
             }
 
-            return View();
+            return View(createViewModel);
                 
 
         }
@@ -73,11 +89,11 @@ namespace EmployeeManagement.Controllers
             {
                 Employee employeeFromDb = _employeeRepository.GetEmployee(employee.Id);
                 employeeFromDb.Name = employee.Name;
-                employeeFromDb.Email = employee.Email;
                 employeeFromDb.Department = employee.Department;
 
+                Console.WriteLine(employee.Email.ToString());
                 Employee updatedEmployee = _employeeRepository.Update(employeeFromDb);
-                return RedirectToAction("Index");
+                return RedirectToAction("List");
             }
             return View(employee);
         }
@@ -92,16 +108,20 @@ namespace EmployeeManagement.Controllers
         public async Task<IActionResult> Delete(Employee employee)
         {
             Employee employeeFromDb = _employeeRepository.GetEmployee(employee.Id);
-            //var user = await _userManager.FindByEmailAsync(employee.Email);
-            
-            if(employeeFromDb != null )
-                //&& user!=null)
+            var employeeEmail = employeeFromDb.Email;
+            var user = await _userManager.FindByEmailAsync(employeeEmail);
+
+            if (user != null)
             {
-               // var employeeFromUserDb = await _userManager.DeleteAsync(user);
-                Employee deletedEmployee = _employeeRepository.Delete(employee.Id);
-                return RedirectToAction("Index");
+                await _userManager.DeleteAsync(user);
             }
-            return View(employee);
+
+            if (employeeFromDb != null )
+            {
+                Employee deletedEmployee = _employeeRepository.Delete(employee.Id);    
+            }
+            return RedirectToAction("List");
+           
             
         }
     }

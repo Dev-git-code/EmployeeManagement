@@ -6,6 +6,8 @@ namespace EmployeeManagement.ViewModels
     {
         [Required]
         [EmailAddress]
+        [RegularExpression(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
+            ErrorMessage = "Invalid email format")]
         public string Email { get; set; }
 
         [Required]
