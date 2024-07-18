@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EmployeeManagement.Models.RoleManagement;
 
-namespace EmployeeManagement.Models
+namespace EmployeeManagement.Models.EmployeeManagement
 {
     public class Employee
     {

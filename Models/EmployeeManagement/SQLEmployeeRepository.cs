@@ -1,8 +1,6 @@
-﻿
+﻿using Microsoft.EntityFrameworkCore;
 
-using Microsoft.EntityFrameworkCore;
-
-namespace EmployeeManagement.Models
+namespace EmployeeManagement.Models.EmployeeManagement
 {
     public class SQLEmployeeRepository : IEmployeeRepository
     {
@@ -22,7 +20,7 @@ namespace EmployeeManagement.Models
         public Employee Delete(int id)
         {
             Employee employee = _context.Employees.Find(id);
-            if(employee != null)
+            if (employee != null)
             {
                 _context.Employees.Remove(employee);
                 _context.SaveChanges();

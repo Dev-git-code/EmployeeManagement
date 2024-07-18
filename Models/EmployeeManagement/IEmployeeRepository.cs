@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace EmployeeManagement.Models
+namespace EmployeeManagement.Models.EmployeeManagement
 {
     public interface IEmployeeRepository
     {

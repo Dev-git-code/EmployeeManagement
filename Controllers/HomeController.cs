@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.Models;
+﻿using EmployeeManagement.Models.EmployeeManagement;
+using EmployeeManagement.Models.RoleManagement;
 using EmployeeManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -36,7 +37,7 @@ namespace EmployeeManagement.Controllers
             return View(employeeListModel);
         }
 
-        public async Task<IActionResult> Details(int? id)
+        public ViewResult Details(int? id)
         {
 
             HomeDetailsViewModel homeDetailsViewModel = new HomeDetailsViewModel()
@@ -58,26 +59,35 @@ namespace EmployeeManagement.Controllers
         [Authorize(Roles="Admin")]
         public async Task<IActionResult> Create(CreateViewModel createViewModel)
         {
-            var user = new IdentityUser
+            if (ModelState.IsValid)
             {
-                UserName = createViewModel.employee.Email,
-                Email = createViewModel.employee.Email
-            };
-
-            var result = await _userManager.CreateAsync(user, createViewModel.Password);
-
-            if (result.Succeeded)
-            {
-                Employee newEmployee = _employeeRepository.Add(createViewModel.employee);
-                if (createViewModel.employee.Role == Roles.Admin)
+                var user = new IdentityUser
                 {
-                    await _userManager.AddToRoleAsync(user, "Admin");
-                }else
+                    UserName = createViewModel.employee.Email,
+                    Email = createViewModel.employee.Email
+                };
+
+                var result = await _userManager.CreateAsync(user, createViewModel.Password);
+
+                if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(user, "Employee");
+                    Employee newEmployee = _employeeRepository.Add(createViewModel.employee);
+                    if (createViewModel.employee.Role == Roles.Admin)
+                    {
+                        await _userManager.AddToRoleAsync(user, "Admin");
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, "Employee");
+                    }
+                    //await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("details", "home", new { id = newEmployee.Id });
                 }
-                await _signInManager.SignInAsync(user, isPersistent: false);
-                return RedirectToAction("details", "home", new { id = newEmployee.Id });
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
 
             return View(createViewModel);
