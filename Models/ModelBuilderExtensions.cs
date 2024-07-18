@@ -1,4 +1,5 @@
 ﻿
+using EmployeeManagement.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,11 +20,6 @@ namespace EmployeeManagement.Models
                 new Employee { Id = 6, Name = "Akash", Department = Department.Engineering, Email = "akash@accops.com", Role = Roles.Employee },
                 new Employee { Id = 7, Name = "Arjun", Department = Department.IT_Infra, Email = "arjun@accops.com" , Role = Roles.Employee },
                 new Employee { Id = 8, Name = "Risabh Rai", Department = Department.Customer_Support, Email = "risabh.rai@accops.com", Role = Roles.Employee }
-            );
-
-            modelBuilder.Entity<IdentityRole>().HasData(
-                 new IdentityRole() { Name = "Administrator" },
-                 new IdentityRole() { Name = "Employee" }
             );
         }
     }

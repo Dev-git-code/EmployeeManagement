@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddMvc();
@@ -21,6 +21,22 @@ class Program
         app.UseStaticFiles();
         app.UseAuthentication();
         app.UseAuthorization();
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            await CreateRoles.CreateRolesAsync(roleManager);
+        }
+
+        using (var scope = app.Services.CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
+            await SuperAdmin.CreateSuperAdmin(userManager, employeeRepository);
+
+        }
+
         app.Run();
+
     }
 }

@@ -31,12 +31,15 @@
                 <img src="~/images/employee_logo.png" width="40" height="40">
             </a>
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a asp-controller="Home" asp-action="List" class="nav-link">List</a>
-                </li>
-                <li class="nav-item">
-                    <a asp-controller="Home" asp-action="Create" class="nav-link">Create</a>
-                </li>    
+                 @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                 {
+                    <li class="nav-item">
+                        <a asp-controller="Home" asp-action="List" class="nav-link">List</a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Home" asp-action="Create" class="nav-link">Create</a>
+                    </li>   
+                 }
             </ul>
             <ul class="navbar-nav ms-auto">
                 @if (signInManager.IsSignedIn(User))
@@ -49,6 +52,7 @@
                             </button>
                         </form>
                     </li>
+                   
                 }
                 else
                 {
