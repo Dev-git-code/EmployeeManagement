@@ -1,5 +1,6 @@
 ﻿using EmployeeManagement.Models.EmployeeManagement;
 using EmployeeManagement.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -85,6 +86,14 @@ namespace EmployeeManagement.Controllers
                 }
             }
             return View(registerViewModel);
+        }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }

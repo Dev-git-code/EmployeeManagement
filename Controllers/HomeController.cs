@@ -39,10 +39,15 @@ namespace EmployeeManagement.Controllers
 
         public ViewResult Details(int? id)
         {
-
+            Employee employee = _employeeRepository.GetEmployee(id ?? 1);
+            if (employee == null)
+            {
+                Response.StatusCode = 404;
+                return View("EmployeeNotFound", id);
+            }
             HomeDetailsViewModel homeDetailsViewModel = new HomeDetailsViewModel()
             {
-                Employee = _employeeRepository.GetEmployee(id ?? 1),
+                Employee = employee,
                 PageTitle = "Employee Details"
             };
             return View(homeDetailsViewModel);
@@ -89,10 +94,7 @@ namespace EmployeeManagement.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-
             return View(createViewModel);
-                
-
         }
 
         public ViewResult Edit(int id)

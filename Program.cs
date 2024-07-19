@@ -18,9 +18,19 @@ class Program
         .AddEntityFrameworkStores<AppDbContext>();
 
         var app = builder.Build();
+        if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            app.UseStatusCodePagesWithRedirects("/Error/{0}");
+        }
+        app.UseStaticFiles();
         app.UseRouting();
         app.MapDefaultControllerRoute();
-        app.UseStaticFiles();
+       
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -34,18 +44,9 @@ class Program
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
             var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
-            await SuperAdmin.CreateSuperAdmin(userManager, employeeRepository);
-            //await SeedUsers.Seed(userManager, employeeRepository);
-
+            await SuperAdmin.CreateSuperAdmin(userManager, employeeRepository); 
         }
-
-        /*using (var scope = app.Services.CreateScope())
-        {
-            var appdbcontext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            appdbcontext.Database.EnsureDeleted();
-        }*/
-        
-
+     
         app.Run();
 
     }
