@@ -86,6 +86,7 @@ namespace EmployeeManagement.Controllers
                         await _userManager.AddToRoleAsync(user, "Employee");
                     }
                     //await _signInManager.SignInAsync(user, isPersistent: false);
+                    TempData["success"] = "The Employee has been created successfully";
                     return RedirectToAction("details", "home", new { id = newEmployee.Id });
                 }
 
@@ -94,6 +95,7 @@ namespace EmployeeManagement.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+            TempData["error"] = "The Employee could not be created";
             return View(createViewModel);
         }
 
@@ -114,8 +116,10 @@ namespace EmployeeManagement.Controllers
                 employeeFromDb.Department = employee.Department;
  
                 Employee updatedEmployee = _employeeRepository.Update(employeeFromDb);
+                TempData["success"] = "The Employee details has been updated successfully";
                 return RedirectToAction("Details",new { id = employeeFromDb.Id });
             }
+            TempData["error"] = "The Employee details could not be updated";
             return View(employee);
         }
 
@@ -137,14 +141,16 @@ namespace EmployeeManagement.Controllers
             if (user != null)
             {
                 await _userManager.DeleteAsync(user);
+                if (employeeFromDb != null)
+                {
+                    Employee deletedEmployee = _employeeRepository.Delete(employee.Id);               
+                }
+                TempData["success"] = "The Employee details has been deleted successfully";
+                return RedirectToAction("List");
             }
 
-            if (employeeFromDb != null )
-            {
-                Employee deletedEmployee = _employeeRepository.Delete(employee.Id);    
-            }
-            return RedirectToAction("List");
-           
+            TempData["error"] = "The Employee details could not be deleted";
+            return View(employeeFromDb);
             
         }
     }

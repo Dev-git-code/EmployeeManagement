@@ -38,9 +38,10 @@ namespace EmployeeManagement.Controllers
                 if (result.Succeeded)
                 {
                     Employee employeeFromDb = await _employeeRepository.GetEmployeeByEmailAsync(model.Email);
+                    TempData["success"] = "Login Successful";
                     return RedirectToAction("details", "home", new { id = employeeFromDb.Id });
                 }
-
+                TempData["error"] = "Login Unsuccessful";
                 ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
             }
 
@@ -77,6 +78,7 @@ namespace EmployeeManagement.Controllers
                 {
                     Employee newEmployee = _employeeRepository.Add(registerViewModel.employee);  
                     await _signInManager.SignInAsync(user, isPersistent: false);
+                    TempData["success"] = "The Employee has been registered successfully";
                     return RedirectToAction("details","home", new { id = newEmployee.Id });
                 }
 
@@ -85,6 +87,7 @@ namespace EmployeeManagement.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+            TempData["error"] = "The Employee could not be registered";
             return View(registerViewModel);
         }
 
