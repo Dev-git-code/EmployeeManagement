@@ -37,20 +37,26 @@ namespace EmployeeManagement.Controllers
             return View(employeeListModel);
         }
 
-        public ViewResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
-            Employee employee = _employeeRepository.GetEmployee(id ?? 1);
-            if (employee == null)
+            var employeeFromDb = await _employeeRepository.GetEmployeeByEmailAsync(User.Identity.Name);
+            if(employeeFromDb.Id == id || employeeFromDb.Role == Roles.Admin)
             {
-                Response.StatusCode = 404;
-                return View("EmployeeNotFound", id);
+                Employee employee = _employeeRepository.GetEmployee(id ?? 1);
+                if (employee == null)
+                {
+                    Response.StatusCode = 404;
+                    return View("EmployeeNotFound", id);
+                }
+                HomeDetailsViewModel homeDetailsViewModel = new HomeDetailsViewModel()
+                {
+                    Employee = employee,
+                    PageTitle = "Employee Details"
+                };
+                return View(homeDetailsViewModel);
             }
-            HomeDetailsViewModel homeDetailsViewModel = new HomeDetailsViewModel()
-            {
-                Employee = employee,
-                PageTitle = "Employee Details"
-            };
-            return View(homeDetailsViewModel);
+            return RedirectToAction("AccessDenied","Account");
+           
 
         }
 
