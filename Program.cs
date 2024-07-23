@@ -12,7 +12,7 @@ class Program
         builder.Services.AddMvc();
         builder.Services.AddDbContext<AppDbContext>(option =>
         option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-        builder.Services.AddScoped<IEmployeeRepository, SQLEmployeeRepository>();
+        builder.Services.AddScoped<IEmployeeRepository, SPEmployeeRepository>();
         builder.Services.AddIdentity<IdentityUser, IdentityRole>()
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<AppDbContext>();
