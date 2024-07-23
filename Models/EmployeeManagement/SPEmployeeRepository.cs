@@ -2,11 +2,11 @@
 
 namespace EmployeeManagement.Models.EmployeeManagement
 {
-    public class SQLEmployeeRepository : IEmployeeRepository
+    public class SPEmployeeRepository : IEmployeeRepository
     {
         private readonly AppDbContext _context;
 
-        public SQLEmployeeRepository(AppDbContext context)
+        public SPEmployeeRepository(AppDbContext context)
         {
             _context = context;
         }
@@ -30,12 +30,12 @@ namespace EmployeeManagement.Models.EmployeeManagement
 
         public IEnumerable<Employee> GetAllEmployees()
         {
-            return _context.Employees;
+            return _context.Employees.FromSqlRaw<Employee>("spEmployees_Get");
         }
 
         public Employee? GetEmployee(int id)
         {
-            //return _context.Employees.Find(id);
+            
             return _context.Employees.FromSqlRaw<Employee>("spEmployees_Get {0}", id)
                 .ToList().FirstOrDefault();
         }
