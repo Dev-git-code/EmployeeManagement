@@ -76,10 +76,11 @@ namespace EmployeeManagement.Controllers
 
                 if (result.Succeeded)
                 {
-                    Employee newEmployee = _employeeRepository.Add(registerViewModel.employee);  
+                    Employee newEmployee = _employeeRepository.Add(registerViewModel.employee);
+                    Employee EmployeeFromDb = await _employeeRepository.GetEmployeeByEmailAsync(registerViewModel.employee.Email);  
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     TempData["success"] = "The Employee has been registered successfully";
-                    return RedirectToAction("details","home", new { id = newEmployee.Id });
+                    return RedirectToAction("details","home", new { id = EmployeeFromDb.Id });
                 }
 
                 foreach(var error in result.Errors)
