@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace EmployeeManagement.Models.EmployeeManagement
 {
@@ -10,53 +12,102 @@ namespace EmployeeManagement.Models.EmployeeManagement
         {
             _context = context;
         }
-        public Employee Add(Employee employee)
+        public Employee? Add(Employee employee)
         {
-            _context.Employees.Add(employee);
-            _context.SaveChanges();
+            var parameters = new[]
+            {
+                new SqlParameter("@Name", employee.Name),
+                new SqlParameter("@Email", employee.Email),
+                new SqlParameter("@Department", employee.Department),
+                new SqlParameter("@Role", employee.Role)
+            };
+
+            _context.Database.ExecuteSqlRaw("Exec dbo.spEmployee_Upsert @Name, @Email, @Department, @Role", parameters);
+
             return employee;
         }
-
+        
         public Employee? Delete(int id)
         {
-            Employee employee = _context.Employees.Find(id);
+            Employee? employee = _context.Employees
+                                .FromSqlRaw<Employee>("spEmployees_Get @Id", new SqlParameter("@Id", id))
+                                .ToList()
+                                .FirstOrDefault();
+
             if (employee != null)
             {
-                _context.Employees.Remove(employee);
-                _context.SaveChanges();
+                var sql = "Exec dbo.spEmployee_Delete @EmpId";
+                var parameter = new SqlParameter("@EmpId", id);
+                _context.Database.ExecuteSqlRaw(sql, parameter);
             }
+
             return employee;
+
         }
 
         public IEnumerable<Employee> GetAllEmployees()
         {
-            return _context.Employees.FromSqlRaw<Employee>("spEmployees_Get");
+            return _context.Employees.FromSqlRaw<Employee>("Exec dbo.spEmployees_Get");
         }
 
         public Employee? GetEmployee(int id)
         {
-            
-            return _context.Employees.FromSqlRaw<Employee>("spEmployees_Get {0}", id)
-                .ToList().FirstOrDefault();
+
+            var parameter = new SqlParameter("@Id", id);
+
+            return _context.Employees
+                .FromSqlRaw<Employee>("Exec dbo.spEmployees_Get @Id", parameter)
+                .ToList()
+                .FirstOrDefault();
+
         }
 
-        public async Task<Employee> GetEmployeeByEmailAsync(string email)
+        public async Task<Employee?> GetEmployeeByEmailAsync(string email)
         {
-            return await _context.Employees.FirstOrDefaultAsync(e => e.Email == email);
+            // var emailParam = new SqlParameter("@Email", SqlDbType.NVarChar, email)
+
+            /*var employees = await _context.Employees
+                .FromSqlRaw("spEmployees_Get {0}",email)
+                .ToListAsync();
+
+            return employees.FirstOrDefault();*/
+
+
+            /*string sql = "EXEC dbo.spEmployees_Get @Email = ";
+            sql += "'" + email + "'";
+
+            return _context.Employees
+                .FromSqlRaw(sql)
+                .ToList().FirstOrDefault();*/
+
+            var sql = "EXEC dbo.spEmployees_Get @Id, @Email";
+            var parameters = new[]
+            {
+                new SqlParameter("@Email", email),
+                new SqlParameter("@Id", DBNull.Value)
+            };
+
+            return _context.Employees
+                .FromSqlRaw<Employee>(sql, parameters)
+                .ToList()
+                .FirstOrDefault();
+
         }
 
         public Employee Update(Employee employeeUpdates)
         {
-            var employee = _context.Employees.Update(employeeUpdates);
-            _context.SaveChanges();
-            return employeeUpdates;
+            var parameters = new[]
+            {
+                new SqlParameter("@Name", employeeUpdates.Name),
+                new SqlParameter("@Email", employeeUpdates.Email),
+                new SqlParameter("@Department", employeeUpdates.Department),
+                new SqlParameter("@Role", employeeUpdates.Role),
+                new SqlParameter("@Id", employeeUpdates.Id)
+            };
 
-            /*
-            var employee = _context.Employees.Attach(employeeUpdates);
-            employee.State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            _context.SaveChanges();
+            _context.Database.ExecuteSqlRaw("Exec dbo.spEmployee_Upsert @Name, @Email, @Department, @Role, @Id", parameters);
+
             return employeeUpdates;
-            */
         }
     }
 }

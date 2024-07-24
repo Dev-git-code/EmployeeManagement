@@ -35,9 +35,8 @@ namespace EmployeeManagement.Models.EmployeeManagement
 
         public Employee? GetEmployee(int id)
         {
-            //return _context.Employees.Find(id);
-            return _context.Employees.FromSqlRaw<Employee>("spEmployees_Get {0}", id)
-                .ToList().FirstOrDefault();
+            return _context.Employees.Find(id);
+            
         }
 
         public async Task<Employee> GetEmployeeByEmailAsync(string email)

@@ -83,6 +83,7 @@ namespace EmployeeManagement.Controllers
                 if (result.Succeeded)
                 {
                     Employee newEmployee = _employeeRepository.Add(createViewModel.employee);
+                    Employee employeeFromDb = await _employeeRepository.GetEmployeeByEmailAsync(createViewModel.employee.Email);
                     if (createViewModel.employee.Role == Roles.Admin)
                     {
                         await _userManager.AddToRoleAsync(user, "Admin");
@@ -93,7 +94,7 @@ namespace EmployeeManagement.Controllers
                     }
                     //await _signInManager.SignInAsync(user, isPersistent: false);
                     TempData["success"] = "The Employee has been created successfully";
-                    return RedirectToAction("details", "home", new { id = newEmployee.Id });
+                    return RedirectToAction("details", "home", new { id = employeeFromDb.Id });
                 }
 
                 foreach (var error in result.Errors)
