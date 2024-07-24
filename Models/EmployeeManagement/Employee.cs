@@ -18,5 +18,11 @@ namespace EmployeeManagement.Models.EmployeeManagement
 
         [Required]
         public Roles? Role { get; set; }
+       
+        // Foreign key to AspNetUsers
+        public string? IdentityUserId { get; set; }
+
+        // Navigation property
+        public virtual ApplicationUser? IdentityUser { get; set; }
     }
 }

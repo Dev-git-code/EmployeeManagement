@@ -17,7 +17,11 @@ namespace EmployeeManagement.Models.EmployeeManagement
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            //modelBuilder.Seed();          
+            // Additional configuration
+            modelBuilder.Entity<Employee>()
+                .HasOne(e => e.IdentityUser)
+                .WithMany(u => u.Employees)
+                .HasForeignKey(e => e.IdentityUserId);
         }
     }
 }
