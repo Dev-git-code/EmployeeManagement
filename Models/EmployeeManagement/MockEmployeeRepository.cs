@@ -18,7 +18,7 @@
             };
         }
 
-        public Employee Add(Employee employee)
+        public async Task<Employee> Add(Employee employee, string p)
         {
             employee.Id = _employeesList.Max(x => x.Id) + 1;
             _employeesList.Add(employee);
@@ -52,7 +52,7 @@
             throw new NotImplementedException();
         }
 
-        public Employee Update(Employee employeeUpdates)
+        public async Task<Employee> Update(Employee employeeUpdates)
         {
             Employee employee = _employeesList.FirstOrDefault(e => e.Id == employeeUpdates.Id);
             if (employee != null)

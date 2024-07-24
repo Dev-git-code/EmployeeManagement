@@ -8,9 +8,9 @@ namespace EmployeeManagement.Models.EmployeeManagement
         IEnumerable<Employee> GetAllEmployees();
 
         Task<Employee> GetEmployeeByEmailAsync(string email);
-        Employee Add(Employee employee);
+        Task<Employee> Add(Employee employee, string password);
 
-        Employee Update(Employee employeeUpdates);
+        Task<Employee> Update(Employee employeeUpdates); 
         Employee Delete(int id);
     }
 }

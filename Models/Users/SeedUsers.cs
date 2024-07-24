@@ -34,24 +34,26 @@ namespace EmployeeManagement.Models.Users
                         Email = userInfo.Email
                     };
 
-                    var employee = new Employee()
-                    {
-                        Name = userInfo.Name,
-                        Email = userInfo.Email,
-                        Department = userInfo.Department,
-                        Role = userInfo.Role
-                    };
-
                     var result = await userManager.CreateAsync(user, userInfo.Password);
                     if (result.Succeeded)
                     {
-                        employeeRepository.Add(employee);
-                    }
+                        // Add user to role
+                        await userManager.AddToRoleAsync(user, userInfo.Role.ToString());
 
-                    await userManager.AddToRoleAsync(user, userInfo.Role.ToString());
+                        // Create and add Employee
+                        var employee = new Employee()
+                        {
+                            Name = userInfo.Name,
+                            Email = userInfo.Email,
+                            Department = userInfo.Department,
+                            Role = userInfo.Role,
+                            IdentityUserId = user.Id  // Set the foreign key
+                        };
+
+                        await employeeRepository.Add(employee,userInfo.Password);
+                    }
                 }
             }
         }
     }
 }
-

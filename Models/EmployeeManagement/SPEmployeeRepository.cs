@@ -12,7 +12,7 @@ namespace EmployeeManagement.Models.EmployeeManagement
         {
             _context = context;
         }
-        public Employee? Add(Employee employee)
+        public async Task<Employee?> Add(Employee employee,string p)
         {
             var parameters = new[]
             {
@@ -94,7 +94,7 @@ namespace EmployeeManagement.Models.EmployeeManagement
 
         }
 
-        public Employee Update(Employee employeeUpdates)
+        public async Task<Employee> Update(Employee employeeUpdates)
         {
             var parameters = new[]
             {

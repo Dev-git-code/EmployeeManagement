@@ -72,35 +72,15 @@ namespace EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new IdentityUser
-                {
-                    UserName = createViewModel.employee.Email,
-                    Email = createViewModel.employee.Email
-                };
+                var newEmployee = await _employeeRepository.Add(createViewModel.employee, createViewModel.Password);
+                TempData["success"] = "The Employee has been created successfully";
+                return RedirectToAction("details", "home", new { id = newEmployee.Id });
+                
 
-                var result = await _userManager.CreateAsync(user, createViewModel.Password);
-
-                if (result.Succeeded)
-                {
-                    Employee newEmployee = _employeeRepository.Add(createViewModel.employee);
-                    Employee employeeFromDb = await _employeeRepository.GetEmployeeByEmailAsync(createViewModel.employee.Email);
-                    if (createViewModel.employee.Role == Roles.Admin)
-                    {
-                        await _userManager.AddToRoleAsync(user, "Admin");
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, "Employee");
-                    }
-                    //await _signInManager.SignInAsync(user, isPersistent: false);
-                    TempData["success"] = "The Employee has been created successfully";
-                    return RedirectToAction("details", "home", new { id = employeeFromDb.Id });
-                }
-
-                foreach (var error in result.Errors)
+               /* foreach (var error in newEmployee.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
-                }
+                }*/
             }
             TempData["error"] = "The Employee could not be created";
             return View(createViewModel);
@@ -113,18 +93,13 @@ namespace EmployeeManagement.Controllers
         }
 
         [HttpPost]
-        public IActionResult Edit(Employee employee)
+        public async Task<IActionResult> Edit(Employee employee)
         {
             if (ModelState.IsValid)
-            {
-                Employee employeeFromDb = _employeeRepository.GetEmployee(employee.Id);
-                employeeFromDb.Name = employee.Name;
-                employeeFromDb.Email = employee.Email;
-                employeeFromDb.Department = employee.Department;
- 
-                Employee updatedEmployee = _employeeRepository.Update(employeeFromDb);
+            {               
+                Employee updatedEmployee = await _employeeRepository.Update(employee);
                 TempData["success"] = "The Employee details has been updated successfully";
-                return RedirectToAction("Details",new { id = employeeFromDb.Id });
+                return RedirectToAction("Details",new { id = updatedEmployee.Id });
             }
             TempData["error"] = "The Employee details could not be updated";
             return View(employee);

@@ -1,18 +1,17 @@
 ﻿using EmployeeManagement.Models.EmployeeManagement;
 using EmployeeManagement.Models.RoleManagement;
 using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
 
 namespace EmployeeManagement.Models.Users
 {
     public class SuperAdmin
     {
-
         public static async Task CreateSuperAdmin(UserManager<IdentityUser> userManager,
             IEmployeeRepository employeeRepository)
         {
             string email = "admin@admin.com";
             string password = "Test@1234";
-
 
             if (await userManager.FindByEmailAsync(email) == null)
             {
@@ -22,21 +21,23 @@ namespace EmployeeManagement.Models.Users
                     Email = email
                 };
 
-                var employee = new Employee()
-                {
-                    Name = "Super Admin",
-                    Email = email,
-                    Department = Department.None,
-                    Role = Roles.Admin
-                };
+                //var result = await userManager.CreateAsync(user, password);
 
-                var result = await userManager.CreateAsync(user, password);
-                if (result.Succeeded)
-                {
-                    employeeRepository.Add(employee);
-                }
+                    // Create and add Employee with the foreign key reference
+                    var employee = new Employee()
+                    {
+                        Name = "Super Admin",
+                        Email = email,
+                        Department = Department.None,
+                        Role = Roles.Admin,
+                        IdentityUserId = user.Id  // Set the foreign key
+                    };
 
-                await userManager.AddToRoleAsync(user, "Admin");
+                    await employeeRepository.Add(employee, password);
+
+                    // Assign the user to the Admin role
+                    await userManager.AddToRoleAsync(user, "Admin");
+                
             }
         }
     }

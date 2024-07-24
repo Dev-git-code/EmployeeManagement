@@ -12,8 +12,8 @@ class Program
         builder.Services.AddMvc();
         builder.Services.AddDbContext<AppDbContext>(option =>
         option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-        builder.Services.AddScoped<IEmployeeRepository, SPEmployeeRepository>();
-        //builder.Services.AddScoped<IEmployeeRepository, SQLEmployeeRepository>();
+        //builder.Services.AddScoped<IEmployeeRepository, SPEmployeeRepository>();
+        builder.Services.AddScoped<IEmployeeRepository, SQLEmployeeRepository>();
         builder.Services.AddIdentity<IdentityUser, IdentityRole>()
         .AddRoles<IdentityRole>()
         .AddEntityFrameworkStores<AppDbContext>();
@@ -35,7 +35,9 @@ class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-        using (var scope = app.Services.CreateScope())
+
+
+       using (var scope = app.Services.CreateScope())
         {
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             await CreateRoles.CreateRolesAsync(roleManager);
@@ -46,7 +48,10 @@ class Program
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
             var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
             await SuperAdmin.CreateSuperAdmin(userManager, employeeRepository); 
+            //await SeedUsers.Seed(userManager, employeeRepository);
         }
+
+
      
         app.Run();
 
