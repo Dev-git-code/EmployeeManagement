@@ -17,10 +17,4 @@ public class ApplicationUser : IdentityUser
     [Required]
     public Roles? Role { get; set; }
 
-    // Custom email validation
-    /*public bool IsValidEmail()
-    {
-        var regex = new Regex(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$");
-        return regex.IsMatch(Email);
-    }*/
 }
