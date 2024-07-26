@@ -3,23 +3,20 @@ using EmployeeManagement.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace EmployeeManagement.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly IEmployeeRepository _employeeRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-
-        public AccountController(UserManager<IdentityUser> userManager,
-                                 SignInManager<IdentityUser> signInManager,
-                                 IEmployeeRepository employeeRepository)
+        public AccountController(UserManager<ApplicationUser> userManager,
+                                 SignInManager<ApplicationUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _employeeRepository = employeeRepository;
         }
 
         public IActionResult Login()
@@ -37,9 +34,9 @@ namespace EmployeeManagement.Controllers
 
                 if (result.Succeeded)
                 {
-                    Employee employeeFromDb = await _employeeRepository.GetEmployeeByEmailAsync(model.Email);
+                    var user = await _userManager.FindByEmailAsync(model.Email);
                     TempData["success"] = "Login Successful";
-                    return RedirectToAction("details", "home", new { id = employeeFromDb.Id });
+                    return RedirectToAction("details", "home", new { id = user.Id });
                 }
                 TempData["error"] = "Login Unsuccessful";
                 ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
@@ -66,24 +63,25 @@ namespace EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new IdentityUser
+                var user = new ApplicationUser
                 {
-                    UserName = registerViewModel.employee.Email,
-                    Email = registerViewModel.employee.Email
+                    UserName = registerViewModel.Email,
+                    Email = registerViewModel.Email,
+                    Name = registerViewModel.Name,
+                    Department = registerViewModel.Department,
+                    Role = registerViewModel.Role
                 };
 
                 var result = await _userManager.CreateAsync(user, registerViewModel.Password);
 
                 if (result.Succeeded)
                 {
-                    Employee newEmployee = _employeeRepository.Add(registerViewModel.employee);
-                    Employee EmployeeFromDb = await _employeeRepository.GetEmployeeByEmailAsync(registerViewModel.employee.Email);  
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     TempData["success"] = "The Employee has been registered successfully";
-                    return RedirectToAction("details","home", new { id = EmployeeFromDb.Id });
+                    return RedirectToAction("details", "home", new { id = user.Id });
                 }
 
-                foreach(var error in result.Errors)
+                foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
@@ -92,12 +90,61 @@ namespace EmployeeManagement.Controllers
             return View(registerViewModel);
         }
 
-
         [HttpGet]
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
             return View();
         }
-    }
+
+        [HttpGet]
+        public async Task<IActionResult> ChangePassword(string id)
+        {
+            var currentUser = await _userManager.FindByIdAsync(id);
+            if (User.Identity.Name == currentUser.Email)
+            {
+                var changePasswordViewModel = new ChangePasswordViewModel
+                {
+                    Id = currentUser.Id
+                };
+                return View(changePasswordViewModel);
+            }
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        [HttpPost]
+        
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel changePasswordViewModel)
+        {
+            if (ModelState.IsValid)
+            {
+                ApplicationUser user = await _userManager.FindByIdAsync(changePasswordViewModel.Id);
+                if(user.Email == User.Identity.Name)
+                {
+                    if (user != null)
+                    {
+                        IdentityResult result = await _userManager.ChangePasswordAsync(user,
+                                                                changePasswordViewModel.OldPassword,
+                                                                changePasswordViewModel.NewPassword);
+                        if (result.Succeeded)
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            TempData["success"] = "The Employee password has been successfully";
+                            return RedirectToAction("details", "home", new { id = user.Id });
+                        }
+
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                    }
+                }
+                return RedirectToAction("AccessDenied", "Account");
+               
+            }
+            TempData["error"] = "The Employee Password could not be Changed.";
+            return View(changePasswordViewModel);
+        }
+
+     }
 }

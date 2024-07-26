@@ -1,11 +1,10 @@
-﻿using EmployeeManagement.Models.EmployeeManagement;
+﻿using EmployeeManagement.Models.Users;
 
 namespace EmployeeManagement.ViewModels
 {
     public class HomeDetailsViewModel
     {
-        // nullable or new Employee(); ? 
-        public Employee Employee { get; set; }
-        public string PageTitle {  get; set; } = string.Empty;
+        public ApplicationUser ApplicationUser { get; set; }
+        public string PageTitle { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace EmployeeManagement.Models.Users
 {
     public class SeedUsers
     {
-        public static async Task Seed(UserManager<IdentityUser> userManager, IEmployeeRepository employeeRepository)
+        public static async Task Seed(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             var users = new List<(string Email, string Password, string Name, Department Department, Roles Role)>
             {
@@ -28,16 +28,11 @@ namespace EmployeeManagement.Models.Users
             {
                 if (await userManager.FindByEmailAsync(userInfo.Email) == null)
                 {
-                    var user = new IdentityUser()
+                    var user = new ApplicationUser()
                     {
                         UserName = userInfo.Email,
-                        Email = userInfo.Email
-                    };
-
-                    var employee = new Employee()
-                    {
-                        Name = userInfo.Name,
                         Email = userInfo.Email,
+                        Name = userInfo.Name,
                         Department = userInfo.Department,
                         Role = userInfo.Role
                     };
@@ -45,13 +40,10 @@ namespace EmployeeManagement.Models.Users
                     var result = await userManager.CreateAsync(user, userInfo.Password);
                     if (result.Succeeded)
                     {
-                        employeeRepository.Add(employee);
+                        await userManager.AddToRoleAsync(user, userInfo.Role.ToString());
                     }
-
-                    await userManager.AddToRoleAsync(user, userInfo.Role.ToString());
                 }
             }
         }
     }
 }
-

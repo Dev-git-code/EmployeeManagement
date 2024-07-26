@@ -12,11 +12,15 @@ class Program
         builder.Services.AddMvc();
         builder.Services.AddDbContext<AppDbContext>(option =>
         option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-        builder.Services.AddScoped<IEmployeeRepository, SPEmployeeRepository>();
+        //builder.Services.AddScoped<IEmployeeRepository, SPEmployeeRepository>();
         //builder.Services.AddScoped<IEmployeeRepository, SQLEmployeeRepository>();
-        builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+        builder.Services.AddScoped<IApplicationUserRepository, ApplicationUserRepository>();
+        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
         .AddRoles<IdentityRole>()
-        .AddEntityFrameworkStores<AppDbContext>();
+        .AddEntityFrameworkStores<AppDbContext>()
+         .AddDefaultTokenProviders();
+
+        
 
         var app = builder.Build();
         if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
@@ -43,11 +47,22 @@ class Program
 
         using (var scope = app.Services.CreateScope())
         {
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-            var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
-            await SuperAdmin.CreateSuperAdmin(userManager, employeeRepository); 
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            // var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            await SuperAdmin.CreateSuperAdmin(userManager, roleManager); 
+            
         }
-     
+        using (var scope = app.Services.CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            // var employeeRepository = scope.ServiceProvider.GetRequiredService<IEmployeeRepository>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            await SeedUsers.Seed(userManager, roleManager);
+
+        }
+
+
         app.Run();
 
     }

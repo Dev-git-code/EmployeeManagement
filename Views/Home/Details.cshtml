@@ -1,25 +1,23 @@
 ﻿@model HomeDetailsViewModel
-@inject SignInManager<IdentityUser> signInManager
+@inject SignInManager<ApplicationUser> signInManager
 @{
-    ViewBag.Title = "Employee Details";
+    ViewBag.Title = "ApplicationUser Details";
 }
 
 <div class="row justify-content-center m-3">
     <div class="col-sm-8">
         <div class="card">
             <div class="card-header">
-                <h1>@Model.Employee.Name</h1>
+                <h1>@Model.ApplicationUser.Name</h1>
             </div>
 
             <div class="card-body text-center">
-                <img class="card-img-top" src="~/images/noimage.jpg" style="max-width:350px" />
-
-                <h4>Employee ID : @Model.Employee.Id</h4>
-                <h4>Email : @Model.Employee.Email</h4>
-                <h4>Department : @Model.Employee.Department</h4>
+                <img class="card-img-top" src="~/images/noimage.jpg" style="max-width:350px" />               
+                <h4>Email : @Model.ApplicationUser.Email</h4>
+                <h4>Department : @Model.ApplicationUser.Department</h4>
                  @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
                 {
-                    <h4>Role : @Model.Employee.Role</h4>
+                    <h4>Role : @Model.ApplicationUser.Role</h4>
                 }
 
             </div>
@@ -28,8 +26,14 @@
                 {
                     <a asp-controller="Home" asp-action="List" class="btn btn-primary">Back</a>
                 }
-                <a asp-controller="home" asp-action="edit" asp-route-id="@Model.Employee.Id"
+                <a asp-controller="home" asp-action="edit" asp-route-id="@Model.ApplicationUser.Id"
                    class="btn btn-primary m-1">Edit</a>
+                @if (User.Identity.Name == @Model.ApplicationUser.Email)
+                {
+                    <a asp-controller="Account" asp-action="ChangePassword" asp-route-id="@Model.ApplicationUser.Id"
+                       class="btn btn-primary m-1" style="width:200px;">Change Password</a>
+                }
+                
                       
             </div>
         </div>

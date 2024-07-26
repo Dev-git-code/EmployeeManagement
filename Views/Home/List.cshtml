@@ -1,26 +1,26 @@
-﻿@model IEnumerable<Employee>
+﻿@model IEnumerable<ApplicationUser>
 
 @{
-    ViewBag.Title = "Employees List";
+    ViewBag.Title = "users List";
 }
 
 <div class="card-group">
-    @foreach (var employee in Model)
+    @foreach (var user in Model)
     {
-        @if (String.Equals(User.Identity.Name,employee.Email))
+        @if (String.Equals(User.Identity.Name,user.Email))
         {
             continue;
         }
         <div class="card m-4" style="max-width:305px; min-width:305px;">
             <img class="card-img-top" src="~/images/noimage.jpg" />
             <div class="card-header">
-                <h3>@employee.Name</h3>
+                <h3>@user.Name</h3>
             </div>
             <div class="card-footer text-center">
-                <a asp-controller="home" asp-action="details" asp-route-id="@employee.Id" class="btn btn-primary">View</a>
-                <a asp-controller="home" asp-action="edit" asp-route-id="@employee.Id"
+                <a asp-controller="home" asp-action="details" asp-route-id="@user.Id" class="btn btn-primary">View</a>
+                <a asp-controller="home" asp-action="edit" asp-route-id="@user.Id"
                    class="btn btn-primary m-1">Edit</a>
-                <a asp-controller="home" asp-action="delete" asp-route-id="@employee.Id" class="btn btn-danger">Delete</a>
+                <a asp-controller="home" asp-action="delete" asp-route-id="@user.Id" class="btn btn-danger">Delete</a>
             </div>
         </div>
     }
