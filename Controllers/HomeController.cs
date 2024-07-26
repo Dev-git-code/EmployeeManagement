@@ -30,38 +30,58 @@ namespace EmployeeManagement.Controllers
             return View();
         }
 
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ViewResult> List()
         {
-            var users = await _userRepository.GetAllUsersAsync();
-            return View(users);
+            try
+            {
+                var users = await _userRepository.GetAllUsersAsync();
+                return View(users);
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "An error occurred while retrieving the user list.";               
+                return View("Error"); 
+            }
         }
+
 
         public async Task<IActionResult> Details(string id)
         {
-            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            if (currentUser == null)
+            try
             {
-                var Currentuser = await _userManager.FindByIdAsync(id);
-            }
-            if (currentUser.Id == id || currentUser.Role == Roles.Admin)
-            {
-                var user = await _userRepository.GetUserByIdAsync(id);
-                if (user == null)
+                var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
+                if (currentUser == null)
                 {
-                    Response.StatusCode = 404;
-                    return View("EmployeeNotFound", id);
+                    currentUser = await _userManager.FindByIdAsync(id);
                 }
 
-                HomeDetailsViewModel homeDetailsViewModel = new HomeDetailsViewModel()
+                if (currentUser != null && (currentUser.Id == id || currentUser.Role == Roles.Admin))
                 {
-                    ApplicationUser = user,
-                    PageTitle = "Employee Details"
-                };
-                return View(homeDetailsViewModel);
+                    var user = await _userRepository.GetUserByIdAsync(id);
+                    if (user == null)
+                    {
+                        Response.StatusCode = 404;
+                        return View("EmployeeNotFound", id);
+                    }
+
+                    var homeDetailsViewModel = new HomeDetailsViewModel
+                    {
+                        ApplicationUser = user,
+                        PageTitle = "Employee Details"
+                    };
+                    return View(homeDetailsViewModel);
+                }
+
+                return RedirectToAction("AccessDenied", "Account");
             }
-            return RedirectToAction("AccessDenied", "Account");
+            catch
+            {
+                TempData["error"] = "An error occurred while retrieving the employee details.";
+                return RedirectToAction("Index", "Home");
+            }
         }
+
 
 
         [Authorize(Roles="Admin")]
@@ -71,85 +91,31 @@ namespace EmployeeManagement.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create(CreateViewModel createViewModel)
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
+                try
                 {
-                    UserName = createViewModel.Email,
-                    Email = createViewModel.Email,
-                    Name = createViewModel.Name,
-                    Department = createViewModel.Department,
-                    Role = createViewModel.Role
-                };
-
-                var result = await _userManager.CreateAsync(user, createViewModel.Password);
-
-                if (result.Succeeded)
-                {
-                    // Assign the role to the newly created user
-                    if (createViewModel.Role == Roles.Admin)
+                    var user = new ApplicationUser
                     {
-                        await _userManager.AddToRoleAsync(user, "Admin");
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, "Employee");
-                    }
+                        UserName = createViewModel.Email,
+                        Email = createViewModel.Email,
+                        Name = createViewModel.Name,
+                        Department = createViewModel.Department,
+                        Role = createViewModel.Role
+                    };
 
-                    // Optional: Sign in the new user
-                    // await _signInManager.SignInAsync(user, isPersistent: false);
-
-                    TempData["success"] = "The user has been created successfully";
-                    return RedirectToAction("Details", "Home", new { id = user.Id });
-                }
-
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-            }
-
-            TempData["error"] = "The user could not be created";
-            return View(createViewModel);
-        }
-
-        public async Task<ViewResult> Edit(string id)
-        {
-            var employeeFromDb = await _userRepository.GetUserByIdAsync(id);
-            return View(employeeFromDb);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(ApplicationUser user)
-        {
-            var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
-            if (currentUser.Id == user.Id || currentUser.Role == Roles.Admin)
-            {
-                if (ModelState.IsValid)
-                {
-                    var userFromDb = await _userManager.FindByIdAsync(user.Id);
-                    if (userFromDb == null)
-                    {
-                        Response.StatusCode = 404;
-                        return View("UserNotFound", user.Id);
-                    }
-
-                    // Update user properties
-                    userFromDb.Email = user.Email;
-                    userFromDb.UserName = user.Email; // Username usually matches email
-                    userFromDb.Name = user.Name;
-                    userFromDb.Department = user.Department;
-                    userFromDb.Role = user.Role;
-
-                    var result = await _userManager.UpdateAsync(userFromDb);
+                    var result = await _userManager.CreateAsync(user, createViewModel.Password);
 
                     if (result.Succeeded)
                     {
-                        TempData["success"] = "The user details have been updated successfully";
-                        return RedirectToAction("Details", new { id = userFromDb.Id });
+                        var role = createViewModel.Role == Roles.Admin ? "Admin" : "Employee";
+                        await _userManager.AddToRoleAsync(user, role);
+
+                        TempData["success"] = "The user has been created successfully";
+                        return RedirectToAction("Details", "Home", new { id = user.Id });
                     }
 
                     foreach (var error in result.Errors)
@@ -157,6 +123,84 @@ namespace EmployeeManagement.Controllers
                         ModelState.AddModelError(string.Empty, error.Description);
                     }
                 }
+                catch
+                {
+                    TempData["error"] = "An error occurred while creating the user.";
+                    return View(createViewModel);
+                }
+            }
+
+            TempData["error"] = "The user could not be created.";
+            return View(createViewModel);
+        }
+
+
+        public async Task<ViewResult> Edit(string id)
+        {
+            try
+            {
+                var employeeFromDb = await _userRepository.GetUserByIdAsync(id);
+                if (employeeFromDb == null)
+                {
+                    TempData["error"] = "Employee not found.";
+                    return View("Error"); 
+                }
+                return View(employeeFromDb);
+            }
+            catch
+            {
+                TempData["error"] = "An error occurred while retrieving the employee details.";
+                return View("Error");
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(ApplicationUser user)
+        {
+            try
+            {
+                var currentUser = await _userManager.FindByNameAsync(User.Identity.Name);
+                if (currentUser.Id == user.Id || currentUser.Role == Roles.Admin)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        var userFromDb = await _userManager.FindByIdAsync(user.Id);
+                        if (userFromDb == null)
+                        {
+                            Response.StatusCode = 404;
+                            return View("UserNotFound", user.Id);
+                        }
+
+                        userFromDb.Email = user.Email;
+                        userFromDb.UserName = user.Email;
+                        userFromDb.Name = user.Name;
+                        userFromDb.Department = user.Department;
+                        userFromDb.Role = user.Role;
+
+                        var result = await _userManager.UpdateAsync(userFromDb);
+
+                        if (result.Succeeded)
+                        {
+                            TempData["success"] = "The user details have been updated successfully";
+                            return RedirectToAction("Details", new { id = userFromDb.Id });
+                        }
+
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                    }
+                }
+                else
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
+            }
+            catch
+            {
+                TempData["error"] = "An error occurred while updating the user details.";
+                return View(user);
             }
 
             TempData["error"] = "The user details could not be updated";
@@ -165,50 +209,70 @@ namespace EmployeeManagement.Controllers
 
 
 
-        [Authorize(Roles="Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<ViewResult> Delete(string id)
         {
-            var employeeFromDb = await _userRepository.GetUserByIdAsync(id);
-            return View(employeeFromDb);
+            try
+            {
+                var employeeFromDb = await _userRepository.GetUserByIdAsync(id);
+                if (employeeFromDb == null)
+                {
+                    TempData["error"] = "Employee not found.";
+                    return View("Error"); 
+                }
+                return View(employeeFromDb);
+            }
+            catch
+            {
+                TempData["error"] = "An error occurred while retrieving the employee details.";
+                return View("Error"); 
+            }
         }
+
 
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(ApplicationUser user)
         {
-            if (user == null)
+            try
             {
-                TempData["error"] = "User not found";
-                return RedirectToAction("List");
-            }
+                if (user == null)
+                {
+                    TempData["error"] = "User not found";
+                    return RedirectToAction("List");
+                }
 
-            // Fetch the user from the database to ensure it exists
-            var userFromDb = await _userManager.FindByIdAsync(user.Id);
-            if (userFromDb == null)
+                var userFromDb = await _userManager.FindByIdAsync(user.Id);
+                if (userFromDb == null)
+                {
+                    TempData["error"] = "User not found";
+                    return RedirectToAction("List");
+                }
+
+                var result = await _userManager.DeleteAsync(userFromDb);
+
+                if (result.Succeeded)
+                {
+                    TempData["success"] = "The user has been deleted successfully";
+                    return RedirectToAction("List");
+                }
+
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                TempData["error"] = "The user could not be deleted";
+                return View("Error");
+            }
+            catch
             {
-                TempData["error"] = "User not found";
-                return RedirectToAction("List");
+                TempData["error"] = "An error occurred while deleting the user.";
+                return View("Error");
             }
-
-            // Delete the user
-            var result = await _userManager.DeleteAsync(userFromDb);
-
-            if (result.Succeeded)
-            {
-                TempData["success"] = "The user has been deleted successfully";
-                return RedirectToAction("List");
-            }
-
-            // If deletion fails, add errors to ModelState
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            TempData["error"] = "The user could not be deleted";
-            return View("Error");
         }
+
 
 
     }

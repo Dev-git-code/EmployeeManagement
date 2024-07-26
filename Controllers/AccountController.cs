@@ -29,21 +29,30 @@ namespace EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(
-                    model.Email, model.Password, model.RememberMe, false);
-
-                if (result.Succeeded)
+                try
                 {
-                    var user = await _userManager.FindByEmailAsync(model.Email);
-                    TempData["success"] = "Login Successful";
-                    return RedirectToAction("details", "home", new { id = user.Id });
+                    var result = await _signInManager.PasswordSignInAsync(
+                        model.Email, model.Password, model.RememberMe, false);
+
+                    if (result.Succeeded)
+                    {
+                        var user = await _userManager.FindByEmailAsync(model.Email);
+                        TempData["success"] = "Login Successful";
+                        return RedirectToAction("details", "home", new { id = user.Id });
+                    }
+                    TempData["error"] = "Login Unsuccessful";
+                    ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
                 }
-                TempData["error"] = "Login Unsuccessful";
-                ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
+                catch (Exception ex)
+                {
+                    TempData["error"] = "An error occurred during login.";
+                    ModelState.AddModelError(string.Empty, "An error occurred. Please try again later.");
+                }
             }
 
             return View(model);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> LogOut()
@@ -63,32 +72,42 @@ namespace EmployeeManagement.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser
+                try
                 {
-                    UserName = registerViewModel.Email,
-                    Email = registerViewModel.Email,
-                    Name = registerViewModel.Name,
-                    Department = registerViewModel.Department,
-                    Role = registerViewModel.Role
-                };
+                    var user = new ApplicationUser
+                    {
+                        UserName = registerViewModel.Email,
+                        Email = registerViewModel.Email,
+                        Name = registerViewModel.Name,
+                        Department = registerViewModel.Department,
+                        Role = registerViewModel.Role
+                    };
 
-                var result = await _userManager.CreateAsync(user, registerViewModel.Password);
+                    var result = await _userManager.CreateAsync(user, registerViewModel.Password);
 
-                if (result.Succeeded)
-                {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    TempData["success"] = "The Employee has been registered successfully";
-                    return RedirectToAction("details", "home", new { id = user.Id });
+                    if (result.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        TempData["success"] = "The Employee has been registered successfully";
+                        return RedirectToAction("details", "home", new { id = user.Id });
+                    }
+
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
-
-                foreach (var error in result.Errors)
+                catch (Exception ex)
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    TempData["error"] = "An error occurred during registration.";
+                    ModelState.AddModelError(string.Empty, "An error occurred. Please try again later.");
                 }
             }
+
             TempData["error"] = "The Employee could not be registered";
             return View(registerViewModel);
         }
+
 
         [HttpGet]
         [AllowAnonymous]
@@ -100,36 +119,57 @@ namespace EmployeeManagement.Controllers
         [HttpGet]
         public async Task<IActionResult> ChangePassword(string id)
         {
-            var currentUser = await _userManager.FindByIdAsync(id);
-            if (User.Identity.Name == currentUser.Email)
+            try
             {
-                var changePasswordViewModel = new ChangePasswordViewModel
+                var currentUser = await _userManager.FindByIdAsync(id);
+                if (currentUser == null)
                 {
-                    Id = currentUser.Id
-                };
-                return View(changePasswordViewModel);
+                    TempData["error"] = "User not found.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                if (User.Identity.Name == currentUser.Email)
+                {
+                    var changePasswordViewModel = new ChangePasswordViewModel
+                    {
+                        Id = currentUser.Id
+                    };
+                    return View(changePasswordViewModel);
+                }
+
+                return RedirectToAction("AccessDenied", "Account");
             }
-            return RedirectToAction("AccessDenied", "Account");
+            catch (Exception ex)
+            {
+                TempData["error"] = "An error occurred while loading the change password page.";
+                return RedirectToAction("Index", "Home");
+            }
         }
 
+
         [HttpPost]
-        
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel changePasswordViewModel)
         {
             if (ModelState.IsValid)
             {
-                ApplicationUser user = await _userManager.FindByIdAsync(changePasswordViewModel.Id);
-                if(user.Email == User.Identity.Name)
+                try
                 {
-                    if (user != null)
+                    var user = await _userManager.FindByIdAsync(changePasswordViewModel.Id);
+                    if (user == null)
+                    {
+                        TempData["error"] = "User not found.";
+                        return RedirectToAction("Index", "Home");
+                    }
+
+                    if (user.Email == User.Identity.Name)
                     {
                         IdentityResult result = await _userManager.ChangePasswordAsync(user,
-                                                                changePasswordViewModel.OldPassword,
-                                                                changePasswordViewModel.NewPassword);
+                                                        changePasswordViewModel.OldPassword,
+                                                        changePasswordViewModel.NewPassword);
                         if (result.Succeeded)
                         {
                             await _signInManager.SignInAsync(user, isPersistent: false);
-                            TempData["success"] = "The Employee password has been successfully";
+                            TempData["success"] = "The Employee password has been successfully changed.";
                             return RedirectToAction("details", "home", new { id = user.Id });
                         }
 
@@ -138,13 +178,22 @@ namespace EmployeeManagement.Controllers
                             ModelState.AddModelError(string.Empty, error.Description);
                         }
                     }
+                    else
+                    {
+                        return RedirectToAction("AccessDenied", "Account");
+                    }
                 }
-                return RedirectToAction("AccessDenied", "Account");
-               
+                catch (Exception ex)
+                {
+                    TempData["error"] = "An error occurred while changing the password.";
+                    ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again later.");
+                }
             }
-            TempData["error"] = "The Employee Password could not be Changed.";
+
+            TempData["error"] = "The Employee Password could not be changed.";
             return View(changePasswordViewModel);
         }
 
-     }
+
+    }
 }
